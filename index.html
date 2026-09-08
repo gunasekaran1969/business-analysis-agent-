@@ -1,0 +1,125 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Business Analysis AI Agent</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<header>
+    <h1>🤖 Business Analysis AI Agent</h1>
+    <p>Sales Intelligence Dashboard</p>
+</header>
+
+<main>
+
+    <section class="upload-box">
+        <h2>📁 Load Sales Data</h2>
+        <p>Our sample file is <b>sales-transactions-1000.csv</b></p>
+
+        <input type="file" id="fileInput" accept=".csv">
+
+        <button onclick="loadSampleData()">Load Sample Dataset</button>
+    </section>
+
+    <section id="dashboard" class="hidden">
+
+        <h2>📊 Business KPIs</h2>
+
+        <div class="kpi-grid">
+
+            <div class="card">
+                <span>Total Revenue</span>
+                <strong id="totalRevenue">₹0</strong>
+            </div>
+
+            <div class="card">
+                <span>Total Units</span>
+                <strong id="totalUnits">0</strong>
+            </div>
+
+            <div class="card">
+                <span>Average Revenue</span>
+                <strong id="avgRevenue">₹0</strong>
+            </div>
+
+            <div class="card">
+                <span>Top Product</span>
+                <strong id="topProduct">-</strong>
+            </div>
+
+            <div class="card">
+                <span>Top Region</span>
+                <strong id="topRegion">-</strong>
+            </div>
+
+            <div class="card">
+                <span>Top Channel</span>
+                <strong id="topChannel">-</strong>
+            </div>
+
+        </div>
+
+        <section class="analysis">
+            <h2>🔎 Business Analysis</h2>
+            <div id="insights"></div>
+        </section>
+
+        <section class="tables">
+
+            <div>
+                <h2>🏆 Product Performance</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Product</th>
+                            <th>Revenue</th>
+                            <th>Units</th>
+                        </tr>
+                    </thead>
+                    <tbody id="productTable"></tbody>
+                </table>
+            </div>
+
+            <div>
+                <h2>🌎 Regional Performance</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Region</th>
+                            <th>Revenue</th>
+                            <th>Units</th>
+                        </tr>
+                    </thead>
+                    <tbody id="regionTable"></tbody>
+                </table>
+            </div>
+
+            <div>
+                <h2>📢 Channel Performance</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Channel</th>
+                            <th>Revenue</th>
+                            <th>Units</th>
+                        </tr>
+                    </thead>
+                    <tbody id="channelTable"></tbody>
+                </table>
+            </div>
+
+        </section>
+
+    </section>
+
+</main>
+
+<script src="app.js"></script>
+
+</body>
+</html>
+```
