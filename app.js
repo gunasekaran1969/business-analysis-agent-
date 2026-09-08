@@ -1,9 +1,15 @@
 ```javascript
+/* =====================================================
+   BUSINESS ANALYSIS AI AGENT
+   Complete app.js
+===================================================== */
+
 let salesData = [];
 
-/* -----------------------------
-   CSV PARSER
------------------------------ */
+
+/* =====================================================
+   1. CSV PARSER
+===================================================== */
 
 function parseCSV(text) {
 
@@ -16,7 +22,6 @@ function parseCSV(text) {
     return lines.slice(1).map(line => {
 
         const values = line.split(",");
-
         const row = {};
 
         headers.forEach((header, index) => {
@@ -36,59 +41,83 @@ function parseCSV(text) {
 }
 
 
-/* -----------------------------
-   FILE UPLOAD
------------------------------ */
+/* =====================================================
+   2. FILE UPLOAD
+===================================================== */
 
-document.getElementById("fileInput")
-    .addEventListener("change", function(event) {
+const fileInput =
+    document.getElementById("fileInput");
 
-        const file = event.target.files[0];
+if (fileInput) {
 
-        if (!file) return;
+    fileInput.addEventListener(
+        "change",
+        function(event) {
 
-        const reader = new FileReader();
+            const file =
+                event.target.files[0];
 
-        reader.onload = function(e) {
+            if (!file) return;
 
-            salesData = parseCSV(e.target.result);
+            const reader =
+                new FileReader();
 
-            analyzeData();
-        };
+            reader.onload =
+                function(e) {
 
-        reader.readAsText(file);
-    });
+                    salesData =
+                        parseCSV(e.target.result);
+
+                    analyzeData();
+                };
+
+            reader.readAsText(file);
+        }
+    );
+}
 
 
-/* -----------------------------
-   SAMPLE DATA
------------------------------ */
+/* =====================================================
+   3. LOAD SAMPLE DATASET
+===================================================== */
 
 async function loadSampleData() {
 
     try {
 
         const response =
-            await fetch("sales-transactions-1000.csv");
+            await fetch(
+                "sales-transactions-1000.csv"
+            );
 
-        const text = await response.text();
+        if (!response.ok) {
+            throw new Error(
+                "CSV file not found"
+            );
+        }
 
-        salesData = parseCSV(text);
+        const text =
+            await response.text();
+
+        salesData =
+            parseCSV(text);
 
         analyzeData();
 
     } catch (error) {
 
         alert(
-            "Could not load the sample CSV. Make sure sales-transactions-1000.csv is in the same folder as index.html."
+            "Could not load the sample CSV.\n\n" +
+            "Make sure sales-transactions-1000.csv " +
+            "is in the same folder as index.html."
         );
     }
 }
 
 
-/* -----------------------------
-   MAIN ANALYSIS
------------------------------ */
+/* =====================================================
+   4. MAIN BUSINESS ANALYSIS
+===================================================== */
 
 function analyzeData() {
 
@@ -99,27 +128,39 @@ function analyzeData() {
         return;
     }
 
-    document
-        .getElementById("dashboard")
-        .classList.remove("hidden");
+    const dashboard =
+        document.getElementById("dashboard");
+
+    if (dashboard) {
+        dashboard.classList.remove("hidden");
+    }
 
 
-    /* TOTALS */
+    /* TOTAL REVENUE */
 
     const totalRevenue =
         salesData.reduce(
-            (sum, item) => sum + item.revenue,
+            (sum, item) =>
+                sum + item.revenue,
             0
         );
+
+
+    /* TOTAL UNITS */
 
     const totalUnits =
         salesData.reduce(
-            (sum, item) => sum + item.units,
+            (sum, item) =>
+                sum + item.units,
             0
         );
 
+
+    /* AVERAGE REVENUE */
+
     const avgRevenue =
-        totalRevenue / salesData.length;
+        totalRevenue /
+        salesData.length;
 
 
     /* GROUP DATA */
@@ -134,7 +175,7 @@ function analyzeData() {
         groupData("channel");
 
 
-    /* TOP ITEMS */
+    /* TOP PERFORMERS */
 
     const topProduct =
         getTop(products);
@@ -146,28 +187,40 @@ function analyzeData() {
         getTop(channels);
 
 
-    /* KPI DISPLAY */
+    /* DISPLAY KPIs */
 
-    document.getElementById("totalRevenue")
-        .textContent = formatMoney(totalRevenue);
+    setText(
+        "totalRevenue",
+        formatMoney(totalRevenue)
+    );
 
-    document.getElementById("totalUnits")
-        .textContent = totalUnits.toLocaleString();
+    setText(
+        "totalUnits",
+        totalUnits.toLocaleString()
+    );
 
-    document.getElementById("avgRevenue")
-        .textContent = formatMoney(avgRevenue);
+    setText(
+        "avgRevenue",
+        formatMoney(avgRevenue)
+    );
 
-    document.getElementById("topProduct")
-        .textContent = topProduct.name;
+    setText(
+        "topProduct",
+        topProduct.name
+    );
 
-    document.getElementById("topRegion")
-        .textContent = topRegion.name;
+    setText(
+        "topRegion",
+        topRegion.name
+    );
 
-    document.getElementById("topChannel")
-        .textContent = topChannel.name;
+    setText(
+        "topChannel",
+        topChannel.name
+    );
 
 
-    /* TABLES */
+    /* DISPLAY TABLES */
 
     createTable(
         "productTable",
@@ -185,7 +238,7 @@ function analyzeData() {
     );
 
 
-    /* INSIGHTS */
+    /* DISPLAY INSIGHTS */
 
     createInsights(
         totalRevenue,
@@ -198,9 +251,9 @@ function analyzeData() {
 }
 
 
-/* -----------------------------
-   GROUPING
------------------------------ */
+/* =====================================================
+   5. GROUP DATA
+===================================================== */
 
 function groupData(field) {
 
@@ -209,6 +262,8 @@ function groupData(field) {
     salesData.forEach(item => {
 
         const key = item[field];
+
+        if (!key) return;
 
         if (!groups[key]) {
 
@@ -219,18 +274,24 @@ function groupData(field) {
             };
         }
 
-        groups[key].revenue += item.revenue;
-        groups[key].units += item.units;
+        groups[key].revenue +=
+            Number(item.revenue) || 0;
+
+        groups[key].units +=
+            Number(item.units) || 0;
     });
 
     return Object.values(groups)
-        .sort((a, b) => b.revenue - a.revenue);
+        .sort(
+            (a, b) =>
+                b.revenue - a.revenue
+        );
 }
 
 
-/* -----------------------------
-   TOP PERFORMER
------------------------------ */
+/* =====================================================
+   6. GET TOP PERFORMER
+===================================================== */
 
 function getTop(data) {
 
@@ -247,14 +308,19 @@ function getTop(data) {
 }
 
 
-/* -----------------------------
-   TABLE CREATION
------------------------------ */
+/* =====================================================
+   7. CREATE TABLE
+===================================================== */
 
-function createTable(elementId, data) {
+function createTable(
+    elementId,
+    data
+) {
 
     const table =
         document.getElementById(elementId);
+
+    if (!table) return;
 
     table.innerHTML = "";
 
@@ -264,9 +330,17 @@ function createTable(elementId, data) {
             document.createElement("tr");
 
         row.innerHTML = `
-            <td>${escapeHTML(item.name)}</td>
-            <td>${formatMoney(item.revenue)}</td>
-            <td>${item.units.toLocaleString()}</td>
+            <td>
+                ${escapeHTML(item.name)}
+            </td>
+
+            <td>
+                ${formatMoney(item.revenue)}
+            </td>
+
+            <td>
+                ${item.units.toLocaleString()}
+            </td>
         `;
 
         table.appendChild(row);
@@ -274,9 +348,9 @@ function createTable(elementId, data) {
 }
 
 
-/* -----------------------------
-   BUSINESS INSIGHTS
------------------------------ */
+/* =====================================================
+   8. BUSINESS INSIGHTS
+===================================================== */
 
 function createInsights(
     totalRevenue,
@@ -288,42 +362,250 @@ function createInsights(
 ) {
 
     const insights =
-        document.getElementById("insights");
+        document.getElementById(
+            "insights"
+        );
+
+    if (!insights) return;
 
     insights.innerHTML = "";
 
+
     const messages = [
 
-        `Total revenue generated is ${formatMoney(totalRevenue)} from ${totalUnits.toLocaleString()} units.`,
+        `Total revenue is ${formatMoney(totalRevenue)} from ${totalUnits.toLocaleString()} units.`,
 
-        `${topProduct.name} is the highest-revenue product, generating ${formatMoney(topProduct.revenue)}.`,
+        `${topProduct.name} is the highest-revenue product with ${formatMoney(topProduct.revenue)}.`,
 
-        `${topRegion.name} is the strongest region with revenue of ${formatMoney(topRegion.revenue)}.`,
+        `${topRegion.name} is the strongest region with ${formatMoney(topRegion.revenue)} in revenue.`,
 
-        `${topChannel.name} is the strongest sales channel with revenue of ${formatMoney(topChannel.revenue)}.`,
+        `${topChannel.name} is the strongest sales channel with ${formatMoney(topChannel.revenue)} in revenue.`,
 
-        `The average revenue per transaction is ${formatMoney(avgRevenue)}.`,
+        `Average revenue per transaction is ${formatMoney(avgRevenue)}.`,
 
-        `Business recommendation: focus on the highest-performing product, region and channel while investigating weaker performers for improvement opportunities.`
+        `Recommendation: focus on the strongest products, regions and channels while investigating weaker performers.`
     ];
+
 
     messages.forEach(message => {
 
         const div =
             document.createElement("div");
 
-        div.className = "insight";
+        div.className =
+            "insight";
 
-        div.textContent = "💡 " + message;
+        div.textContent =
+            "💡 " + message;
 
         insights.appendChild(div);
     });
 }
 
 
-/* -----------------------------
-   MONEY FORMAT
------------------------------ */
+/* =====================================================
+   9. AI AGENT — ASK QUESTION
+===================================================== */
+
+async function askAgent(
+    questionFromButton = ""
+) {
+
+    const input =
+        document.getElementById(
+            "userQuestion"
+        );
+
+
+    const question =
+        questionFromButton ||
+        (input
+            ? input.value.trim()
+            : "");
+
+
+    if (!question) {
+
+        return;
+    }
+
+
+    /* DATA CHECK */
+
+    if (!salesData.length) {
+
+        addAgentMessage(
+            "Please load the sales dataset first."
+        );
+
+        return;
+    }
+
+
+    /* SHOW USER QUESTION */
+
+    addUserMessage(question);
+
+
+    if (input) {
+        input.value = "";
+    }
+
+
+    /* LOADING MESSAGE */
+
+    const loading =
+        addAgentMessage(
+            "⏳ Analyzing your business question..."
+        );
+
+
+    try {
+
+        /*
+           Send the question and dataset
+           to our secure backend.
+        */
+
+        const response =
+            await fetch(
+                "/api/analyze",
+                {
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        question: question,
+                        data: salesData
+                    })
+                }
+            );
+
+
+        const result =
+            await response.json();
+
+
+        /* REMOVE LOADING */
+
+        if (loading) {
+            loading.remove();
+        }
+
+
+        /* ERROR */
+
+        if (!response.ok ||
+            result.error) {
+
+            addAgentMessage(
+                "⚠️ " +
+                (
+                    result.error ||
+                    "The AI service returned an error."
+                )
+            );
+
+            return;
+        }
+
+
+        /* AI ANSWER */
+
+        addAgentMessage(
+            result.answer ||
+            "The AI did not return an answer."
+        );
+
+
+    } catch (error) {
+
+        if (loading) {
+            loading.remove();
+        }
+
+        addAgentMessage(
+            "⚠️ I could not connect to the AI service. " +
+            "Make sure the /api/analyze backend is deployed."
+        );
+    }
+}
+
+
+/* =====================================================
+   10. ADD USER MESSAGE
+===================================================== */
+
+function addUserMessage(message) {
+
+    const chatBox =
+        document.getElementById(
+            "chatBox"
+        );
+
+    if (!chatBox) return;
+
+
+    const div =
+        document.createElement("div");
+
+    div.className =
+        "user-message";
+
+    div.textContent =
+        "👤 " + message;
+
+
+    chatBox.appendChild(div);
+
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+}
+
+
+/* =====================================================
+   11. ADD AI MESSAGE
+===================================================== */
+
+function addAgentMessage(message) {
+
+    const chatBox =
+        document.getElementById(
+            "chatBox"
+        );
+
+    if (!chatBox) return null;
+
+
+    const div =
+        document.createElement("div");
+
+    div.className =
+        "agent-message";
+
+    div.textContent =
+        "🤖 " + message;
+
+
+    chatBox.appendChild(div);
+
+
+    chatBox.scrollTop =
+        chatBox.scrollHeight;
+
+
+    return div;
+}
+
+
+/* =====================================================
+   12. FORMAT MONEY
+===================================================== */
 
 function formatMoney(value) {
 
@@ -334,13 +616,15 @@ function formatMoney(value) {
             currency: "USD",
             maximumFractionDigits: 2
         }
-    ).format(value);
+    ).format(
+        Number(value) || 0
+    );
 }
 
 
-/* -----------------------------
-   SECURITY
------------------------------ */
+/* =====================================================
+   13. SAFE TEXT
+===================================================== */
 
 function escapeHTML(value) {
 
@@ -351,4 +635,29 @@ function escapeHTML(value) {
         .replace(/"/g, "&quot;")
         .replace(/'/g, "&#039;");
 }
+
+
+/* =====================================================
+   14. SIMPLE TEXT HELPER
+===================================================== */
+
+function setText(
+    elementId,
+    value
+) {
+
+    const element =
+        document.getElementById(
+            elementId
+        );
+
+    if (element) {
+        element.textContent = value;
+    }
+}
+
+
+/* =====================================================
+   END OF BUSINESS ANALYSIS AI AGENT
+===================================================== */
 ```
