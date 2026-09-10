@@ -15,7 +15,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Question and data are required." });
     }
 
-    // ---- Summarize data instead of sending every row (avoids timeout) ----
+    // ---- Summarize data instead of sending every row (keeps it fast) ----
     const totalRows = data.length;
     const totalUnits = data.reduce((sum, r) => sum + (r.units || 0), 0);
 
@@ -53,30 +53,33 @@ Instructions:
 - Be clear and practical.
 `;
 
-    if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({ error: "OPENAI_API_KEY is not set in environment variables." });
+    if (!process.env.GEMINI_API_KEY) {
+      return res.status(500).json({ error: "GEMINI_API_KEY is not set in environment variables." });
     }
 
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }],
-        max_tokens: 500
-      })
-    });
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${process.env.GEMINI_API_KEY}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [{ text: prompt }]
+            }
+          ]
+        })
+      }
+    );
 
     const result = await response.json();
 
     if (!response.ok) {
-      return res.status(500).json({ error: result.error?.message || "OpenAI request failed" });
+      return res.status(500).json({ error: result.error?.message || "Gemini request failed" });
     }
 
-    const answer = result.choices?.[0]?.message?.content || "No response generated.";
+    const answer =
+      result.candidates?.[0]?.content?.parts?.[0]?.text || "No response generated.";
 
     return res.status(200).json({ answer });
 
